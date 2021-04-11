@@ -70,7 +70,7 @@ impl Info {
     }
 
     /// Returns a filter for the possible encoders that clones this one.
-    pub fn possible_clones(&self) -> () {
+    pub fn possible_clones(&self) {
         unimplemented!()
     }
 }
