@@ -183,7 +183,7 @@ pub trait Device: super::Device {
     ///
     /// - User needs to force-probe connectors to ensure their metadata is up-to-date at startup and after receiving a hot-plug event.
     /// - User may perform a forced-probe when the user explicitly requests it.
-    /// - User shouldn’t perform a forced-probe in other situations.
+    /// - User shouldn't perform a forced-probe in other situations.
     fn get_connector(
         &self,
         handle: connector::Handle,
