@@ -69,10 +69,17 @@ jobs:
           sudo apt-get install -y libdrm-dev
       - name: Fetch drm headers
         run: ./.github/workflows/fetch_headers.sh
-      - name: Update deps
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          default: true
+          override: true
+      - name: Generate minimal-versions lockfile
         uses: actions-rs/cargo@v1
         with:
-          command: update
+          command: generate-lockfile
+          args: -Z minimal-versions
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: 1.66.0
@@ -80,8 +87,6 @@ jobs:
           components: clippy
           default: true
           override: true
-      - name: Downgrade home
-        run: cargo update -p home --precise 0.5.5
       - name: Cargo cache
         uses: actions/cache@v3
         with:
@@ -99,43 +104,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all --all-features --all-targets -- -D warnings -A clippy::redundant_static_lifetimes
-
-  check-minimal:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          sudo apt-get update -y
-          sudo apt-get install -y libdrm-dev
-      - name: Fetch drm headers
-        run: ./.github/workflows/fetch_headers.sh
-      - name: Update deps
-        uses: actions-rs/cargo@v1
-        with:
-          command: update
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          default: true
-          override: true
-      - name: Cargo cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-rust_nightly-${{ hashFiles('**/Cargo.toml') }}
-      - name: Build cache
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ runner.os }}-build-rust_nightly-check-minimal-${{ hashFiles('**/Cargo.toml') }}
-      - name: Check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --all --all-features --all-targets -Z minimal-versions
 
   test:
     needs:
@@ -310,7 +278,6 @@ jobs:
       - format
       - doc
       - check
-      - check-minimal
       - test
     runs-on: ubuntu-22.04
     steps:
